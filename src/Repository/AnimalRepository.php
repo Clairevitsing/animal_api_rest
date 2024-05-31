@@ -68,6 +68,33 @@ class AnimalRepository extends ServiceEntityRepository
         return $animalData;
     }
 
+    
+    public function create(array $data, array $countryIds): Animal
+    {
+        $animal = new Animal();
+
+        foreach ($countryIds as $countryId) {
+            // Get a reference to the Country entity based on the ID
+            $country = $this->countryRepository->find($countryId);
+            if (!$country) {
+                throw new \RuntimeException("Country with ID $countryId doesn't exist.");
+            }
+            // Add the Country entity reference to the animal's collection of countries
+            $animal->addCountry($country);
+        }
+
+        $animal->setName($data['name']);
+        $animal->setAverageSize($data['averageSize']);
+        $animal->setAverageLifespan($data['averageLifespan']);
+        $animal->setMartialArt($data['martialArt']);
+        $animal->setPhoneNumber($data['phoneNumber']);
+
+
+        $this->entityManager->persist($animal);
+        $this->entityManager->flush();
+
+        return $animal;
+    }
 
     public function save(Animal $animal): Animal
     {
